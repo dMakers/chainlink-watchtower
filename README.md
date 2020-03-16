@@ -10,6 +10,8 @@
 | PAGERDUTY_SERVICE_ID | PagerDuty service ID. [How to get the service ID](#how-to-get-the-service-id) |
 | PAGERDUTY_USER_EMAIL | PagerDuty user email that has permissions to trigger incidents of the Service. |
 
+### Configure JOB_IDs
+1. open `jobs.json` file and put all your JOBs in JSON format.
 
 ### How to get the service ID
 1. Go to [services](https://peppersec.pagerduty.com/service-directory?direction=asc&query=&sort_by=name&team_ids=all) page.
