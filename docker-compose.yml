@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  chainlink-watchtower:
+    build: .
+    image: dmakers/chainlink-watchtower
+    restart: always
+    env_file:
+      - .env

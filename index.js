@@ -1,6 +1,7 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const { toHex, sha3 } = require('web3-utils')
+const { alert } = require('./pagerDutyAlert')
 
 const JOBS = require('./jobs.json')
 const { ORACLE_ADDRESS, RPC_WSS_URL, RESPONCE_INTERVAL } = process.env
@@ -32,8 +33,9 @@ function sendAsync({ method, params }) {
 async function checkFulfillment({ jobName, jobId, data }) {
   const isDone = await isFulfilledRequest(data.requestId)
   if (!isDone) {
-    // alert!
-    console.log(`\n[ Alert! The ${jobName}(${jobId}) of ${data.requestId} REQUEST_ID was not fulfilled in ${RESPONCE_INTERVAL} minutes.]\n`)
+    const message = `The ${jobName}(${jobId}) of ${data.requestId} REQUEST_ID was not fulfilled in ${RESPONCE_INTERVAL} minutes.`
+    console.log(`\n[ Alert! ${message} ]\n`)
+    alert(message)
   }
 }
 
@@ -41,14 +43,19 @@ async function isFulfilledRequest(requestId) {
   const mappingPosition = '0'.repeat(63) + '2'
   const key = sha3(requestId + mappingPosition, { encoding: 'hex' })
 
-  const commitment  = await sendAsync({
-    method: 'eth_getStorageAt',
-    params: [
-      ORACLE_ADDRESS,
-      key,
-      'latest'
-    ]
-  })
+  let commitment
+  try{
+    commitment  = await sendAsync({
+      method: 'eth_getStorageAt',
+      params: [
+        ORACLE_ADDRESS,
+        key,
+        'latest'
+      ]
+    })
+  } catch(e) {
+    console.error('sendAsync' ,e)
+  }
   return commitment === '0x0000000000000000000000000000000000000000000000000000000000000000'
 }
 
