@@ -1,16 +1,22 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const { toHex, sha3, toChecksumAddress } = require('web3-utils')
-let alertService
 const JOBS = require('./jobs.json')
-const { ORACLE_ADDRESS, RPC_WSS_URL, RESPONSE_INTERVAL, OPSGENIE_API_KEY } = process.env
-if(OPSGENIE_API_KEY) {
-  alertService = require('./opsGenieAlert')
-} else {
-  alertService = require('./pagerDutyAlert')
-}
+const { ORACLE_ADDRESS, RESPONSE_INTERVAL, ALERT_SERVICE, RPC_WSS_URL } = process.env
 
-const web3 = new Web3(new Web3.providers.WebsocketProvider(RPC_WSS_URL))
+let alertService
+switch(ALERT_SERVICE) {
+  case 'opsgenie':
+    alertService = require('./opsGenieAlert')
+    break
+  case 'pagerduty':
+    alertService = require('./pagerDutyAlert')
+    break
+  default:
+    throw new Error(`There is no such alert service "${ALERT_SERVICE}"`)
+}
+let provider = new Web3.providers.WebsocketProvider(RPC_WSS_URL)
+const web3 = new Web3(provider)
 
 function sendAsync({ method, params }) {
   return new Promise((resolve, reject) => {
@@ -70,6 +76,11 @@ async function isFulfilledRequest(requestId) {
 }
 
 function main() {
+  web3.eth.subscribe('newBlockHeaders').on('data', (block) => {
+    // just to keep connection alive
+    console.log(`\nRecieved new block #${block.number}. Keep waiting for the Chainlink requests.`)
+  })
+
   for(let [jobName, jobId] of Object.entries(JOBS)) {
     web3.eth.subscribe('logs', {
       // address: '',

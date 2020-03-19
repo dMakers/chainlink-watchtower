@@ -6,10 +6,12 @@
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | RPC_WSS_URL          | Ethereum WebSocket RPC url                                                                                                                            |
 | ORACLE_ADDRESS       | Oracle contract address                                                                                                                               |
+| ALERT_SERVICE | What alert service to use. Possible values `opsgenie` or `pagerduty` |
 | RESPONSE_INTERVAL    | How many **minutes** the Watchtower will wait before fire the alert                                                                                   |
 | PAGERDUTY_API_KEY    | PagerDuty API key. [How to gerenate API key](https://support.pagerduty.com/docs/generating-api-keys#section-generating-a-general-access-rest-api-key) |
 | PAGERDUTY_SERVICE_ID | PagerDuty service ID. [How to get the service ID](#how-to-get-the-service-id)                                                                         |
 | PAGERDUTY_USER_EMAIL | PagerDuty user email that has permissions to trigger incidents of the Service.                                                                        |
+| OPSGENIE_API_KEY | OpsGenie API key |
 
 ### Configure JOB_IDs
 
