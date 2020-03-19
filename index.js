@@ -1,10 +1,14 @@
 require('dotenv').config()
 const Web3 = require('web3')
-const { toHex, sha3 } = require('web3-utils')
-const { alert } = require('./pagerDutyAlert')
-
+const { toHex, sha3, toChecksumAddress } = require('web3-utils')
+let alertService
 const JOBS = require('./jobs.json')
-const { ORACLE_ADDRESS, RPC_WSS_URL, RESPONCE_INTERVAL } = process.env
+const { ORACLE_ADDRESS, RPC_WSS_URL, RESPONSE_INTERVAL, OPSGENIE_API_KEY } = process.env
+if(OPSGENIE_API_KEY) {
+  alertService = require('./opsGenieAlert')
+} else {
+  alertService = require('./pagerDutyAlert')
+}
 
 const web3 = new Web3(new Web3.providers.WebsocketProvider(RPC_WSS_URL))
 
@@ -31,11 +35,17 @@ function sendAsync({ method, params }) {
 }
 
 async function checkFulfillment({ jobName, jobId, data }) {
-  const isDone = await isFulfilledRequest(data.requestId)
-  if (!isDone) {
-    const message = `The ${jobName}(${jobId}) of ${data.requestId} REQUEST_ID was not fulfilled in ${RESPONCE_INTERVAL} minutes.`
-    console.log(`\n[ Alert! ${message} ]\n`)
-    alert(message)
+  try {
+    const isDone = await isFulfilledRequest(data.requestId)
+    if (!isDone) {
+      const description = `The ${jobName}(${jobId}) of ${data.requestId} REQUEST_ID was not fulfilled in ${RESPONSE_INTERVAL} minutes.`
+      console.log(`\n[ Alert! ${description} ]\n`)
+      alertService.send({ description, message: 'Failed fulfillment' })
+    } else {
+      console.log(`Request ${jobId} is fulfilled`)
+    }
+  } catch (e) {
+    console.error(e)
   }
 }
 
@@ -48,7 +58,7 @@ async function isFulfilledRequest(requestId) {
     commitment  = await sendAsync({
       method: 'eth_getStorageAt',
       params: [
-        ORACLE_ADDRESS,
+        toChecksumAddress(ORACLE_ADDRESS),
         key,
         'latest'
       ]
@@ -71,7 +81,7 @@ function main() {
       console.log(`\n=========${jobName}==========`)
       console.log(`New request https://etherscan.io/tx/${event.transactionHash}`)
       console.log(`JOB_ID: ${jobId}\nREQUEST_ID: ${data.requestId}`)
-      setTimeout(() => checkFulfillment({ jobName, jobId, data }), Number(RESPONCE_INTERVAL) * 60 * 1000)
+      setTimeout(() => checkFulfillment({ jobName, jobId, data }), Number(RESPONSE_INTERVAL) * 60 * 1000)
     })
   }
 }

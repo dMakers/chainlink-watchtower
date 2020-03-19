@@ -14,6 +14,7 @@
     "i": "^0.3.6",
     "node-pagerduty": "^1.2.0",
     "npm": "^6.14.2",
+    "opsgenie-sdk": "^0.4.3",
     "web3": "^1.2.6"
   },
   "devDependencies": {
