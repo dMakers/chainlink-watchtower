@@ -4,7 +4,7 @@ const { PAGERDUTY_API_KEY, PAGERDUTY_SERVICE_ID, PAGERDUTY_USER_EMAIL } = proces
 
 var pagerDuty = new pdClient(PAGERDUTY_API_KEY)
 
-function alert(message) {
+function send(message) {
   const payload = {
     'incident': {
       'type': 'incident',
@@ -21,10 +21,10 @@ function alert(message) {
     }
   }
   try {
-    pagerDuty.incidents.createIncident(PAGERDUTY_USER_EMAIL, payload)
+    return pagerDuty.incidents.createIncident(PAGERDUTY_USER_EMAIL, payload)
   } catch (e) {
     console.error('pagerduty', e)
   }
 }
 
-module.exports = { alert }
+module.exports = { send }
