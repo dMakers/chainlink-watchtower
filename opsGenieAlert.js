@@ -1,8 +1,9 @@
 require('dotenv').config()
 const opsgenie = require('opsgenie-sdk')
-const { OPSGENIE_API_KEY } = process.env
+const { OPSGENIE_API_KEY, USE_EU_ENDPOINT } = process.env
 
 opsgenie.configure({
+  host: USE_EU_ENDPOINT === 'true' ? 'https://api.eu.opsgenie.com' : 'https://api.opsgenie.com',
   api_key: OPSGENIE_API_KEY
 })
 
