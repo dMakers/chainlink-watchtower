@@ -48,7 +48,7 @@ async function checkFulfillment({ jobName, jobId, data }) {
       console.log(`\n[ Alert! ${description} ]\n`)
       alertService.send({ description, message: 'Failed fulfillment' })
     } else {
-      console.log(`Request ${jobId} is fulfilled`)
+      console.log(`JOB_ID ${jobId} is fulfilled. REQUEST_ID is ${data.requestId}`)
     }
   } catch (e) {
     console.error(e)
